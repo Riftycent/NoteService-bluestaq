@@ -1,0 +1,8 @@
+**/bin/
+**/obj/
+.vs/
+.git/
+NoteService.UnitTests/
+NoteService.IntegrationTests/
+docs/
+**/App_Data/

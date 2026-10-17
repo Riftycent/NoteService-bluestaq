@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore NoteService.slnx
+
+      - name: Format check
+        run: dotnet format NoteService.slnx --verify-no-changes --no-restore
+
+      - name: Build
+        run: dotnet build NoteService.slnx --no-restore -c Release
+
+      - name: Unit tests with coverage
+        run: >
+          dotnet test NoteService.UnitTests --no-build -c Release
+          --settings coverlet.runsettings --collect:"XPlat Code Coverage" --results-directory coverage
+
+      - name: Coverage gate (80% lines)
+        run: |
+          file=$(find coverage -name coverage.cobertura.xml | head -1)
+          rate=$(grep -o 'line-rate="[0-9.]*"' "$file" | head -1 | grep -o '[0-9.]*')
+          echo "Line coverage: $rate"
+          awk -v r="$rate" 'BEGIN { exit (r >= 0.80) ? 0 : 1 }' || { echo "Coverage below 80%"; exit 1; }
+
+      # The runner has Docker, so Testcontainers starts SQL Server for these.
+      - name: Integration tests
+        run: dotnet test NoteService.IntegrationTests --no-build -c Release
+
+      - name: Migration bundle
+        run: |
+          dotnet tool install --global dotnet-ef
+          dotnet ef migrations bundle --project NoteService.Infrastructure --self-contained -r linux-x64 -o efbundle --force
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: efbundle
+          path: efbundle
+
+  image:
+    needs: build-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build container image
+        run: docker build -t noteservice:${{ github.sha }} .

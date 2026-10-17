@@ -1,0 +1,32 @@
+# Local development stack: SQL Server + the API.
+# Apply the schema once with:  dotnet ef database update --project NoteService.Infrastructure
+# (set NOTESERVICE_DB="Server=localhost,1433;Database=NoteService;User Id=sa;Password=<SA_PASSWORD>;TrustServerCertificate=True")
+services:
+  sql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${SA_PASSWORD:?set SA_PASSWORD in your environment or .env file}
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqldata:/var/opt/mssql
+
+  api:
+    build: .
+    depends_on:
+      - sql
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__NoteDb: Server=sql;Database=NoteService;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True
+      Jwt__SigningKey: ${JWT_SIGNING_KEY:?set JWT_SIGNING_KEY (at least 32 characters)}
+      App__PublicBaseUrl: http://localhost:3000
+      App__RequireConfirmedEmail: "false"
+    ports:
+      - "8080:8080"
+    volumes:
+      - blobs:/data
+
+volumes:
+  sqldata:
+  blobs:

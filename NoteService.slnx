@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/docs/">
+    <File Path="docs/How-to-Run.md" />
+  </Folder>
+  <Project Path="NoteService.API/NoteService.API.csproj" />
+  <Project Path="NoteService.Domain/NoteService.Domain.csproj" />
+  <Project Path="NoteService.Infrastructure/NoteService.Infrastructure.csproj" />
+  <Project Path="NoteService.IntegrationTests/NoteService.IntegrationTests.csproj" />
+  <Project Path="NoteService.UnitTests/NoteService.UnitTests.csproj" />
+</Solution>
