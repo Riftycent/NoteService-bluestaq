@@ -136,6 +136,35 @@ Things worth knowing when calling the API:
 - Editing or deleting a note requires an `If-Match` header holding the note's current `ETag` (returned in the `ETag` response header and the `eTag` field). Without it you get `428`; with an outdated one you get `412`.
 - Invite and password-reset links are not emailed in development. They appear in the API console output (look for lines starting `Email to ...`). Emails are delivered by a background job that runs every 60 seconds, so allow up to a minute; the link itself is logged at Debug level, which Development enables.
 
+## 4a. Use the test UI (NoteService.Web)
+
+`NoteService.Web` is a small browser app for adding notes and trying every API feature without writing requests by hand.
+It has no build step and no extra requirements: it is plain HTML/JavaScript served by a tiny ASP.NET Core host.
+
+1. Keep the API running (section 3). Open a **second** terminal in the repository root:
+
+   ```powershell
+   dotnet run --project NoteService.Web
+   ```
+
+2. Open **http://localhost:3000**. The pill at the top should say `API ready`. (The API's Development settings already allow this origin; if you run the UI on another port, add it to `Cors:AllowedOrigins`.)
+3. Register an account, create a team, then explore the tabs:
+
+   | Area | What you can test |
+   |---|---|
+   | Notes | Create, edit (Markdown), pin, move between folders, filter by folder/tag/pinned, sort, page through results, delete to trash |
+   | Editor tabs | **History** (view and restore versions), **Sharing** (per-note Read/Edit overrides), **Attachments** (upload, download, delete), tags |
+   | Concurrency | The *If-Match* dropdown beside **Save** lets you send a current, stale (expect `412`) or missing (expect `428`) ETag. Open the same note in two browser tabs to produce a real conflict |
+   | Search / Trash | Full-text style search with snippets; restore trashed notes |
+   | Members & invites | Invite people, change roles, remove members, leave a team, accept an invite by pasting its token |
+   | Folders & tags | Nested folders (rename, move, delete) and team tags |
+   | Team | Rename or delete the team |
+
+4. **Request log** (bottom of the page) shows every call with its status, timing, ETag and response body (passwords and tokens are masked) so you can see exactly what the API returned.
+
+Tips for testing permissions: buttons are intentionally never hidden by role, so a Viewer who clicks **Save** sees the server's `403`. To test two people, register a second account in a private/incognito window, invite its email from the first account, then paste the invite token (from the API console log) into **Accept invite**.
+In Development, e-mail confirmation is off and links that would be emailed are logged by the API instead.
+
 ## 5. Run the tests
 
 | Command | What it runs | Needs |
@@ -214,10 +243,9 @@ Settings live in `NoteService.API/appsettings.json` and can be overridden with e
 | `dotnet ef database update` fails to connect to `(localdb)\MSSQLLocalDB` | Run `sqllocaldb start MSSQLLocalDB`. If LocalDB is not installed, use Docker or another SQL Server (set `NOTESERVICE_DB`) |
 | API exits at startup with `The SigningKey field is required` | You are not running in Development. Use `dotnet run --project NoteService.API` (which uses the Development profile) or set `Jwt__SigningKey` |
 | `/health/ready` is `Unhealthy` or requests return 500 on database access | The database does not exist or the connection string is wrong. Re-run step 2.3 and make sure the API uses the same connection string |
+| The UI shows `API unreachable` or requests fail with a network/CORS message | The API is not running, the API box at the top has the wrong address, or the UI origin is not in `Cors:AllowedOrigins` (Development allows `http://localhost:3000`) |
 | Port 5172 already in use | Run on another port: `dotnet run --project NoteService.API --urls http://localhost:5200` |
 | Integration tests fail with a Docker error | Start Docker Desktop and wait until it shows the engine running, or set `NOTESERVICE_TEST_SQL` (section 5) |
 | `429 Too Many Requests` | You hit a rate limit; wait a minute |
 | `401` right after it worked | The 15-minute access token expired; sign in again or refresh it |
 | Reset the local database | `dotnet ef database drop --force --project NoteService.Infrastructure` then `dotnet ef database update --project NoteService.Infrastructure` |
-
-More background on the design is in [DESIGN.md](DESIGN.md).

@@ -1,7 +1,6 @@
 # NoteService
 
 Backend for a note-taking service shared by small teams. ASP.NET Core 10 Web API (MVC controllers, REST), SQL Server, EF Core 10.
-The full design is in [docs/DESIGN.md](docs/DESIGN.md).
 
 ## Layout
 
@@ -11,6 +10,7 @@ NoteService.Domain          entities, rules, exceptions (no EF / ASP.NET referen
 NoteService.Infrastructure  EF Core DbContext + migrations, blob storage, email outbox, background jobs
 NoteService.UnitTests         fast tests, no external services (in-process SQLite for data-access code)
 NoteService.IntegrationTests  full API against a real SQL Server
+NoteService.Web                 dependency-free browser UI for trying every feature (static files)
 ```
 
 ## Run locally
@@ -67,3 +67,13 @@ dotnet ef migrations bundle --project NoteService.Infrastructure --self-containe
 ```
 
 Production deployments should run the bundle; the app never migrates itself at startup.
+
+
+## Assessment Summary
+
+The design choices I spent the most time on were choosing the best Authentication for this type of app, How detailed of logging I should implement, and how rubust the note featureset should be. I wanted to add realtime note editing with something like SignalR. Where users could see another user editing a note in realtime.
+If I had more time
+A. I'd probably reduce the amount of unit tests I implemented. I think my 80% coverage is too high for this type of app
+B. I'd add more robust features to the note taking actions. Like adding, editing, and deleting.
+C. I would add a caching layer for static data
+D. I'd add a real time notification system so I can allow users to use @mentions
