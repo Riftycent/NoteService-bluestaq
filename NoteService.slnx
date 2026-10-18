@@ -7,4 +7,5 @@
   <Project Path="NoteService.Infrastructure/NoteService.Infrastructure.csproj" />
   <Project Path="NoteService.IntegrationTests/NoteService.IntegrationTests.csproj" />
   <Project Path="NoteService.UnitTests/NoteService.UnitTests.csproj" />
+  <Project Path="NoteService.Web/NoteService.Web.csproj" />
 </Solution>

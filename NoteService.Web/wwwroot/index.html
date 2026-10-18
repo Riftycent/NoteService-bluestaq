@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NoteService Test UI</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <strong class="brand">NoteService <span class="muted">test UI</span></strong>
+    <label class="api-url">API
+      <input id="apiBase" type="url" spellcheck="false" aria-label="API base URL">
+    </label>
+    <span id="health" class="pill" title="GET /health/ready">?</span>
+    <span class="spacer"></span>
+    <span id="whoami" class="muted"></span>
+    <button id="logoutBtn" class="secondary" hidden>Sign out</button>
+  </header>
+
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+  <main id="root"></main>
+
+  <details id="logPanel" class="log">
+    <summary>Request log <span id="logCount" class="pill">0</span>
+      <button id="clearLog" class="link" type="button">clear</button>
+    </summary>
+    <div id="logList"></div>
+  </details>
+
+  <script src="/app.js"></script>
+</body>
+</html>

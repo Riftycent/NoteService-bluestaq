@@ -4,5 +4,6 @@
 .git/
 NoteService.UnitTests/
 NoteService.IntegrationTests/
+NoteService.Web/
 docs/
 **/App_Data/
